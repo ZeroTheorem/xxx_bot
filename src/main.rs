@@ -6,6 +6,7 @@ use dotenv::dotenv;
 mod messages;
 mod states;
 use teloxide::dispatching::dialogue::InMemStorage;
+use teloxide::types::ParseMode;
 use teloxide::{filter_command, prelude::*};
 
 use crate::bot_commands::Commands;
@@ -17,7 +18,7 @@ async fn main() {
     dotenv().ok();
 
     // create Bot
-    let bot = Bot::from_env();
+    let bot = Bot::from_env().parse_mode(ParseMode::Html);
 
     // Create connections pool
     let pool = database::get_pool().await;

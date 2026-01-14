@@ -5,13 +5,14 @@ use crate::keyboards;
 use crate::messages::Messages;
 use crate::states::State;
 use sqlx::SqlitePool;
+use teloxide::adaptors::DefaultParseMode;
 use teloxide::dispatching::dialogue::InMemStorage;
 use teloxide::prelude::*;
 
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
 pub async fn menu_handler(
-    bot: Bot,
+    bot: DefaultParseMode<Bot>,
     msg: Message,
     pool: SqlitePool,
     msg_provider: Arc<Messages>,
@@ -24,12 +25,13 @@ pub async fn menu_handler(
 }
 
 pub async fn callback_query_handler(
-    bot: Bot,
+    bot: DefaultParseMode<Bot>,
     q: CallbackQuery,
     pool: SqlitePool,
     msg_provider: Arc<Messages>,
     dialogue: Dialogue<State, InMemStorage<State>>,
 ) -> HandlerResult {
+    bot.answer_callback_query(q.id).await?;
     if let Some(ref data) = q.data {
         match data.as_str() {
             "add" => {
@@ -99,7 +101,8 @@ pub async fn callback_query_handler(
     Ok(())
 }
 pub async fn recive_month(
-    bot: Bot,
+    bot: DefaultParseMode<Bot>,
+    pool: SqlitePool,
     dialogue: Dialogue<State, InMemStorage<State>>,
     msg: Message,
 ) -> HandlerResult {
@@ -116,13 +119,18 @@ pub async fn recive_month(
                 .await?;
             return Ok(());
         }
+        let count = database::get_all_by_certain_month(&pool, month).await;
+        bot.send_message(msg.chat.id, format!("this is not integer {}", count))
+            .reply_markup(keyboards::make_main_menu())
+            .await?;
+
         dialogue.exit().await?;
     }
     Ok(())
 }
 
 pub async fn recive_year(
-    bot: Bot,
+    bot: DefaultParseMode<Bot>,
     dialogue: Dialogue<State, InMemStorage<State>>,
     msg: Message,
     pool: SqlitePool,
