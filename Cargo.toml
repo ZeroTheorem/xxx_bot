@@ -1,0 +1,13 @@
+[package]
+name = "db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+sqlx = { version = "0.8", features = [ "runtime-tokio", "sqlite", "macros"] }
+tokio = { version = "1.49.0", features = ["full"] }
+dotenv = "0.15.0"
+teloxide = { version = "0.12", default-features = false, features = ["rustls", "macros", "ctrlc_handler", "throttle"] }
+chrono = "0.4"
+tera = "1.20"
