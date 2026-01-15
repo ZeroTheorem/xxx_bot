@@ -328,6 +328,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "dotenv",
+ "serde",
  "sqlx",
  "teloxide",
  "tera",

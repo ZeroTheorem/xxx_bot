@@ -3,6 +3,7 @@ mod database;
 mod handlers;
 mod keyboards;
 use dotenv::dotenv;
+mod error_handlers;
 mod messages;
 mod states;
 use teloxide::dispatching::dialogue::InMemStorage;
