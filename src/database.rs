@@ -18,13 +18,12 @@ pub async fn get_pool() -> Pool<Sqlite> {
 }
 
 pub async fn create_table_if_not_exists(pool: &SqlitePool) {
-    sqlx::query_as!(
-        User,
+    sqlx::query!(
         "CREATE TABLE IF NOT EXISTS sex (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             month INTEGER NOT NULL,
             year INTEGER NOT NULL
-        );"
+        );",
     )
     .execute(pool)
     .await

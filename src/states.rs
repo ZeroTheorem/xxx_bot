@@ -3,5 +3,5 @@ pub enum State {
     #[default]
     Start,
     ReceiveMonth,
-    ReciveYear,
+    ReceiveYear,
 }

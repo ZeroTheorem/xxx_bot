@@ -113,7 +113,7 @@ pub async fn callback_query_handler(
             "certain_year_total" => {
                 if let Some(message) = q.message {
                     bot.send_message(message.chat.id, "Введи год").await?;
-                    dialogue.update(State::ReciveYear).await.unwrap();
+                    dialogue.update(State::ReceiveYear).await.unwrap();
                 }
             }
             "year_total" => {
@@ -249,7 +249,7 @@ pub async fn recive_month(
                 return Ok(());
             }
         };
-        if month > 12 || month < 0 {
+        if month > 12 || month <= 0 {
             bot.send_message(
                 msg.chat.id,
                 msg_provider.error_message("Такого месяца не существует, попробуйте снова"),

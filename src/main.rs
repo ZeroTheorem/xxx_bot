@@ -3,7 +3,6 @@ mod database;
 mod handlers;
 mod keyboards;
 use dotenv::dotenv;
-mod error_handlers;
 mod messages;
 mod states;
 use teloxide::dispatching::dialogue::InMemStorage;
@@ -37,7 +36,7 @@ async fn main() {
     let message_handler = Update::filter_message()
         .branch(command_handler)
         .branch(dptree::case![State::ReceiveMonth].endpoint(handlers::recive_month))
-        .branch(dptree::case![State::ReciveYear].endpoint(handlers::recive_year));
+        .branch(dptree::case![State::ReceiveYear].endpoint(handlers::recive_year));
 
     let callback_query_hanler =
         Update::filter_callback_query().endpoint(handlers::callback_query_handler);
