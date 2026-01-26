@@ -18,20 +18,10 @@ pub async fn menu_handler(
     msg_provider: Arc<Messages>,
 ) -> HandlerResult {
     let count = database::get_all(&pool).await;
-    match count {
-        Ok(count) => {
-            bot.send_message(msg.chat.id, msg_provider.all_message(count))
-                .reply_markup(keyboards::make_main_menu())
-                .await?;
-            Ok(())
-        }
-        Err(err) => {
-            bot.send_message(msg.chat.id, msg_provider.error_message(&err.to_string()))
-                .reply_markup(keyboards::make_main_menu())
-                .await?;
-            Ok(())
-        }
-    }
+    bot.send_message(msg.chat.id, msg_provider.all_message(count))
+        .reply_markup(keyboards::make_main_menu())
+        .await?;
+    Ok(())
 }
 
 pub async fn callback_query_handler(
@@ -57,51 +47,27 @@ pub async fn callback_query_handler(
                         return Ok(());
                     }
                     let count = database::get_all(&pool).await;
-                    match count {
-                        Ok(count) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.all_message(count),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                        Err(err) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.error_message(&err.to_string()),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                    }
+                    bot.edit_message_text(
+                        message.chat.id,
+                        message.id,
+                        msg_provider.all_message(count),
+                    )
+                    .reply_markup(keyboards::make_main_menu())
+                    .await?;
+                    return Ok(());
                 }
             }
+
             "month_total" => {
                 if let Some(message) = q.message {
                     let count = database::get_all_by_month(&pool).await;
-                    match count {
-                        Ok(count) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.month_message(count),
-                            )
-                            .reply_markup(keyboards::make_month_sub_menu())
-                            .await?;
-                        }
-                        Err(err) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.error_message(&err.to_string()),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                    }
+                    bot.edit_message_text(
+                        message.chat.id,
+                        message.id,
+                        msg_provider.month_message(count),
+                    )
+                    .reply_markup(keyboards::make_month_sub_menu())
+                    .await?;
                 }
             }
             "certain_month_total" => {
@@ -119,76 +85,37 @@ pub async fn callback_query_handler(
             "year_total" => {
                 if let Some(message) = q.message {
                     let count = database::get_all_by_year(&pool).await;
-                    match count {
-                        Ok(count) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.year_message(count),
-                            )
-                            .reply_markup(keyboards::make_year_sub_menu())
-                            .await?;
-                        }
-                        Err(err) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.error_message(&err.to_string()),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                    }
+                    bot.edit_message_text(
+                        message.chat.id,
+                        message.id,
+                        msg_provider.year_message(count),
+                    )
+                    .reply_markup(keyboards::make_year_sub_menu())
+                    .await?;
                 }
             }
             "back_to_main" => {
                 if let Some(message) = q.message {
                     let count = database::get_all(&pool).await;
-                    match count {
-                        Ok(count) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.all_message(count),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                        Err(err) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.error_message(&err.to_string()),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                    }
+                    bot.edit_message_text(
+                        message.chat.id,
+                        message.id,
+                        msg_provider.all_message(count),
+                    )
+                    .reply_markup(keyboards::make_main_menu())
+                    .await?;
                 }
             }
             "last_rows" => {
                 if let Some(message) = q.message {
                     let rows = database::get_last_five_rows(&pool).await;
-                    match rows {
-                        Ok(rows) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.last_rows_message(rows),
-                            )
-                            .reply_markup(keyboards::make_back_button_markup())
-                            .await?;
-                        }
-                        Err(err) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.error_message(&err.to_string()),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                    }
+                    bot.edit_message_text(
+                        message.chat.id,
+                        message.id,
+                        msg_provider.last_rows_message(rows),
+                    )
+                    .reply_markup(keyboards::make_back_button_markup())
+                    .await?;
                 }
             }
             "delete_row" => {
@@ -204,25 +131,13 @@ pub async fn callback_query_handler(
                         return Ok(());
                     }
                     let count = database::get_all(&pool).await;
-                    match count {
-                        Ok(count) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.all_message(count),
-                            )
-                            .reply_markup(keyboards::make_main_menu())
-                            .await?;
-                        }
-                        Err(err) => {
-                            bot.edit_message_text(
-                                message.chat.id,
-                                message.id,
-                                msg_provider.error_message(&err.to_string()),
-                            )
-                            .await?;
-                        }
-                    }
+                    bot.edit_message_text(
+                        message.chat.id,
+                        message.id,
+                        msg_provider.all_message(count),
+                    )
+                    .reply_markup(keyboards::make_main_menu())
+                    .await?;
                 }
             }
             _ => (),
@@ -258,18 +173,10 @@ pub async fn recive_month(
             return Ok(());
         }
         let count = database::get_all_by_certain_month(&pool, month).await;
-        match count {
-            Ok(count) => {
-                bot.send_message(msg.chat.id, msg_provider.certain_month_message(count))
-                    .reply_markup(keyboards::make_main_menu())
-                    .await?;
-            }
-            Err(err) => {
-                bot.send_message(msg.chat.id, msg_provider.error_message(&err.to_string()))
-                    .reply_markup(keyboards::make_main_menu())
-                    .await?;
-            }
-        }
+        bot.send_message(msg.chat.id, msg_provider.certain_month_message(count))
+            .reply_markup(keyboards::make_main_menu())
+            .await?;
+
         dialogue.exit().await?;
     }
     Ok(())
@@ -295,18 +202,10 @@ pub async fn recive_year(
             }
         };
         let count = database::get_all_by_certain_year(&pool, year).await;
-        match count {
-            Ok(count) => {
-                bot.send_message(msg.chat.id, msg_provider.certain_year_message(year, count))
-                    .reply_markup(keyboards::make_main_menu())
-                    .await?;
-            }
-            Err(err) => {
-                bot.send_message(msg.chat.id, msg_provider.error_message(&err.to_string()))
-                    .reply_markup(keyboards::make_main_menu())
-                    .await?;
-            }
-        }
+        bot.send_message(msg.chat.id, msg_provider.certain_year_message(year, count))
+            .reply_markup(keyboards::make_main_menu())
+            .await?;
+
         dialogue.exit().await?;
     }
     Ok(())

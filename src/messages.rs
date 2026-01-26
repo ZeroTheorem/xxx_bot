@@ -1,9 +1,7 @@
-use std::sync::Arc;
+use std::{fmt::Display, sync::Arc};
 
 use ::tera::Tera;
 use tera::Context;
-
-use crate::database::Record;
 
 pub struct Messages {
     tera: Tera,
@@ -38,39 +36,100 @@ impl Messages {
         Arc::new(Messages { tera })
     }
 
-    pub fn all_message(&self, count: i64) -> String {
-        let mut ctx = Context::new();
-        ctx.insert("count", &count);
-        self.tera.render("all_message", &ctx).unwrap()
+    pub fn all_message<T: serde::Serialize, E: Display>(&self, count: Result<T, E>) -> String {
+        match count {
+            Ok(count) => {
+                let mut ctx = Context::new();
+                ctx.insert("count", &count);
+                self.tera.render("all_message", &ctx).unwrap()
+            }
+            Err(err) => {
+                let mut ctx = Context::new();
+                ctx.insert("error", &err.to_string());
+                self.tera.render("error_message", &ctx).unwrap()
+            }
+        }
     }
 
-    pub fn last_rows_message(&self, rows: Vec<Record>) -> String {
-        let mut ctx = Context::new();
-        ctx.insert("rows", &rows);
-        self.tera.render("last_rows_message", &ctx).unwrap()
+    pub fn last_rows_message<T: serde::Serialize, E: Display>(&self, rows: Result<T, E>) -> String {
+        match rows {
+            Ok(rows) => {
+                let mut ctx = Context::new();
+                ctx.insert("rows", &rows);
+                self.tera.render("last_rows_message", &ctx).unwrap()
+            }
+            Err(err) => {
+                let mut ctx = Context::new();
+                ctx.insert("error", &err.to_string());
+                self.tera.render("error_message", &ctx).unwrap()
+            }
+        }
     }
 
-    pub fn month_message(&self, count: i64) -> String {
-        let mut ctx = Context::new();
-        ctx.insert("count", &count);
-        self.tera.render("month_message", &ctx).unwrap()
+    pub fn month_message<T: serde::Serialize, E: Display>(&self, count: Result<T, E>) -> String {
+        match count {
+            Ok(count) => {
+                let mut ctx = Context::new();
+                ctx.insert("count", &count);
+                self.tera.render("month_message", &ctx).unwrap()
+            }
+            Err(err) => {
+                let mut ctx = Context::new();
+                ctx.insert("error", &err.to_string());
+                self.tera.render("error_message", &ctx).unwrap()
+            }
+        }
     }
 
-    pub fn year_message(&self, count: i64) -> String {
-        let mut ctx = Context::new();
-        ctx.insert("count", &count);
-        self.tera.render("year_message", &ctx).unwrap()
+    pub fn year_message<T: serde::Serialize, E: Display>(&self, count: Result<T, E>) -> String {
+        match count {
+            Ok(count) => {
+                let mut ctx = Context::new();
+                ctx.insert("count", &count);
+                self.tera.render("year_message", &ctx).unwrap()
+            }
+            Err(err) => {
+                let mut ctx = Context::new();
+                ctx.insert("error", &err.to_string());
+                self.tera.render("error_message", &ctx).unwrap()
+            }
+        }
     }
-    pub fn certain_month_message(&self, count: i64) -> String {
-        let mut ctx = Context::new();
-        ctx.insert("count", &count);
-        self.tera.render("certain_month_message", &ctx).unwrap()
+    pub fn certain_month_message<T: serde::Serialize, E: Display>(
+        &self,
+        count: Result<T, E>,
+    ) -> String {
+        match count {
+            Ok(count) => {
+                let mut ctx = Context::new();
+                ctx.insert("count", &count);
+                self.tera.render("certain_month_message", &ctx).unwrap()
+            }
+            Err(err) => {
+                let mut ctx = Context::new();
+                ctx.insert("error", &err.to_string());
+                self.tera.render("error_message", &ctx).unwrap()
+            }
+        }
     }
-    pub fn certain_year_message(&self, year: i64, count: i64) -> String {
-        let mut ctx = Context::new();
-        ctx.insert("year", &year);
-        ctx.insert("count", &count);
-        self.tera.render("certain_year_message", &ctx).unwrap()
+    pub fn certain_year_message<T: serde::Serialize, E: Display>(
+        &self,
+        year: T,
+        count: Result<T, E>,
+    ) -> String {
+        match count {
+            Ok(count) => {
+                let mut ctx = Context::new();
+                ctx.insert("year", &year);
+                ctx.insert("count", &count);
+                self.tera.render("certain_year_message", &ctx).unwrap()
+            }
+            Err(err) => {
+                let mut ctx = Context::new();
+                ctx.insert("error", &err.to_string());
+                self.tera.render("error_message", &ctx).unwrap()
+            }
+        }
     }
     pub fn error_message(&self, error: &str) -> String {
         let mut ctx = Context::new();

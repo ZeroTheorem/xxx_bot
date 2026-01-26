@@ -7,6 +7,7 @@ use std::env;
 #[derive(Serialize)]
 pub struct Record {
     pub id: i64,
+    pub day: i64,
     pub month: i64,
     pub year: i64,
 }
@@ -21,6 +22,7 @@ pub async fn create_table_if_not_exists(pool: &SqlitePool) {
     sqlx::query!(
         "CREATE TABLE IF NOT EXISTS sex (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            day INTEGER NOT NULL,
             month INTEGER NOT NULL,
             year INTEGER NOT NULL
         );",
@@ -115,10 +117,16 @@ pub async fn get_all_by_certain_month(pool: &SqlitePool, month: i64) -> Result<i
 }
 pub async fn add_row(pool: &SqlitePool) -> Result<(), sqlx::Error> {
     let now = Local::now();
+    let day = now.day();
     let month = now.month();
     let year = now.year();
-    sqlx::query!("INSERT INTO sex (month, year) VALUES (?, ?);", month, year)
-        .execute(pool)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO sex (day, month, year) VALUES (?, ?, ?);",
+        day,
+        month,
+        year
+    )
+    .execute(pool)
+    .await?;
     Ok(())
 }
