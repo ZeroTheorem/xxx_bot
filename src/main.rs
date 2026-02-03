@@ -20,7 +20,10 @@ async fn main() {
     // log init
     let file_appender = tracing_appender::rolling::never(".", "app.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
-    tracing_subscriber::fmt().with_writer(non_blocking).init();
+    tracing_subscriber::fmt()
+        .with_writer(non_blocking)
+        .with_max_level(tracing::Level::ERROR)
+        .init();
     // create Bot
 
     let bot = Bot::from_env().parse_mode(ParseMode::Html);
