@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
-use crate::database;
+use crate::database::Database;
 use crate::keyboards;
 use crate::messages::Messages;
 use crate::states::State;
-use sqlx::SqlitePool;
 use teloxide::adaptors::DefaultParseMode;
 use teloxide::dispatching::dialogue::InMemStorage;
 use teloxide::prelude::*;
@@ -14,10 +13,10 @@ type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 pub async fn menu_handler(
     bot: DefaultParseMode<Bot>,
     msg: Message,
-    pool: SqlitePool,
+    db: Arc<Database>,
     msg_provider: Arc<Messages>,
 ) -> HandlerResult {
-    let count = database::get_all(&pool).await;
+    let count = db.get_total().await;
     bot.send_message(msg.chat.id, msg_provider.all_message(count))
         .reply_markup(keyboards::make_main_menu())
         .await?;
@@ -27,8 +26,8 @@ pub async fn menu_handler(
 pub async fn callback_query_handler(
     bot: DefaultParseMode<Bot>,
     q: CallbackQuery,
-    pool: SqlitePool,
     msg_provider: Arc<Messages>,
+    db: Arc<Database>,
     dialogue: Dialogue<State, InMemStorage<State>>,
 ) -> HandlerResult {
     bot.answer_callback_query(q.id).await?;
@@ -36,7 +35,7 @@ pub async fn callback_query_handler(
         match data.as_str() {
             "add" => {
                 if let Some(message) = q.message {
-                    if let Err(err) = database::add_row(&pool).await {
+                    if let Err(err) = db.add_row().await {
                         bot.edit_message_text(
                             message.chat.id,
                             message.id,
@@ -46,7 +45,7 @@ pub async fn callback_query_handler(
                         .await?;
                         return Ok(());
                     }
-                    let count = database::get_all(&pool).await;
+                    let count = db.get_total().await;
                     bot.edit_message_text(
                         message.chat.id,
                         message.id,
@@ -60,7 +59,7 @@ pub async fn callback_query_handler(
 
             "month_total" => {
                 if let Some(message) = q.message {
-                    let count = database::get_all_by_month(&pool).await;
+                    let count = db.get_total_by_month().await;
                     bot.edit_message_text(
                         message.chat.id,
                         message.id,
@@ -84,7 +83,7 @@ pub async fn callback_query_handler(
             }
             "year_total" => {
                 if let Some(message) = q.message {
-                    let count = database::get_all_by_year(&pool).await;
+                    let count = db.get_total_by_year().await;
                     bot.edit_message_text(
                         message.chat.id,
                         message.id,
@@ -96,7 +95,7 @@ pub async fn callback_query_handler(
             }
             "back_to_main" => {
                 if let Some(message) = q.message {
-                    let count = database::get_all(&pool).await;
+                    let count = db.get_total().await;
                     bot.edit_message_text(
                         message.chat.id,
                         message.id,
@@ -108,7 +107,7 @@ pub async fn callback_query_handler(
             }
             "last_rows" => {
                 if let Some(message) = q.message {
-                    let rows = database::get_last_five_rows(&pool).await;
+                    let rows = db.get_last_five_rows().await;
                     bot.edit_message_text(
                         message.chat.id,
                         message.id,
@@ -120,7 +119,7 @@ pub async fn callback_query_handler(
             }
             "delete_row" => {
                 if let Some(message) = q.message {
-                    if let Err(err) = database::delete_last_row(&pool).await {
+                    if let Err(err) = db.delete_last_row().await {
                         bot.edit_message_text(
                             message.chat.id,
                             message.id,
@@ -130,7 +129,7 @@ pub async fn callback_query_handler(
                         .await?;
                         return Ok(());
                     }
-                    let count = database::get_all(&pool).await;
+                    let count = db.get_total().await;
                     bot.edit_message_text(
                         message.chat.id,
                         message.id,
@@ -147,13 +146,13 @@ pub async fn callback_query_handler(
 }
 pub async fn recive_month(
     bot: DefaultParseMode<Bot>,
-    pool: SqlitePool,
     dialogue: Dialogue<State, InMemStorage<State>>,
+    db: Arc<Database>,
     msg_provider: Arc<Messages>,
     msg: Message,
 ) -> HandlerResult {
     if let Some(text) = msg.text() {
-        let month: i64 = match text.parse::<i64>() {
+        let month: i32 = match text.parse::<i32>() {
             Ok(i) => i,
             Err(_) => {
                 bot.send_message(
@@ -172,7 +171,7 @@ pub async fn recive_month(
             .await?;
             return Ok(());
         }
-        let count = database::get_all_by_certain_month(&pool, month).await;
+        let count = db.get_total_by_certain_month(month).await;
         bot.send_message(msg.chat.id, msg_provider.certain_month_message(count))
             .reply_markup(keyboards::make_main_menu())
             .await?;
@@ -185,12 +184,12 @@ pub async fn recive_month(
 pub async fn recive_year(
     bot: DefaultParseMode<Bot>,
     dialogue: Dialogue<State, InMemStorage<State>>,
+    db: Arc<Database>,
     msg: Message,
     msg_provider: Arc<Messages>,
-    pool: SqlitePool,
 ) -> HandlerResult {
     if let Some(text) = msg.text() {
-        let year: i64 = match text.parse::<i64>() {
+        let year: i32 = match text.parse::<i32>() {
             Ok(i) => i,
             Err(_) => {
                 bot.send_message(
@@ -201,7 +200,7 @@ pub async fn recive_year(
                 return Ok(());
             }
         };
-        let count = database::get_all_by_certain_year(&pool, year).await;
+        let count = db.get_total_by_certain_year(year).await;
         bot.send_message(msg.chat.id, msg_provider.certain_year_message(year, count))
             .reply_markup(keyboards::make_main_menu())
             .await?;

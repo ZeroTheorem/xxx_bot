@@ -17,17 +17,20 @@ async fn main() {
     // load env variables
     dotenv().ok();
 
+    // log init
+    let file_appender = tracing_appender::rolling::never(".", "app.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+    tracing_subscriber::fmt().with_writer(non_blocking).init();
     // create Bot
+
     let bot = Bot::from_env().parse_mode(ParseMode::Html);
-
+    // Create Database
+    let db = database::Database::new().await;
     // Create connections pool
-    let pool = database::get_pool().await;
-
-    // create messages provider
     let msg_provider = messages::Messages::new();
 
     // Create table
-    database::create_table_if_not_exists(&pool).await;
+    db.create_table_if_not_exists().await;
 
     let command_handler = filter_command::<Commands, _>()
         .branch(dptree::case![Commands::Menu])
@@ -49,7 +52,7 @@ async fn main() {
             .branch(callback_query_hanler),
     )
     .dependencies(dptree::deps![
-        pool,
+        db,
         msg_provider,
         InMemStorage::<State>::new()
     ])
